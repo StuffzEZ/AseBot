@@ -24,7 +24,7 @@ import numpy as np
 @dataclass
 class ProcessConfig:
     """All knobs exposed to the user via the Discord button panel."""
-    remove_bg: bool = True
+    remove_bg: bool = False
     bg_tolerance: int = 80          # 0-255 flood-fill tolerance
     transparency_threshold: int = 12
     remove_colours: list[tuple[int, int, int]] = field(default_factory=list)  # list of RGB tuples
@@ -32,9 +32,9 @@ class ProcessConfig:
     max_colours: int = 256          # palette compression (0 = no limit)
     output_width: int = 0           # 0 = auto-detect
     output_height: int = 0
-    trim_edges: bool = True
+    trim_edges: bool = False
     crop_padding: int = 1
-    pixel_snap: bool = True         # detect and snap to logical pixel grid
+    pixel_snap: bool = False        # detect and snap to logical pixel grid
     resampling: str = "nearest"     # nearest | bilinear | lanczos
 
 

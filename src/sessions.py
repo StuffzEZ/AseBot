@@ -11,20 +11,20 @@ from typing import Optional
 from processor import ProcessConfig, hex_to_rgb
 
 
-# thread_id (int) -> (config, original_image_bytes)
-_sessions: dict[int, tuple[ProcessConfig, bytes]] = {}
+# thread_id (int) -> (config, original_image_bytes, original_filename)
+_sessions: dict[int, tuple[ProcessConfig, bytes, str]] = {}
 _lock = asyncio.Lock()
 
 
-async def get_session(thread_id: int) -> Optional[tuple[ProcessConfig, bytes]]:
+async def get_session(thread_id: int) -> Optional[tuple[ProcessConfig, bytes, str]]:
     async with _lock:
         return _sessions.get(thread_id)
 
 
-async def create_session(thread_id: int, image_bytes: bytes) -> ProcessConfig:
+async def create_session(thread_id: int, image_bytes: bytes, filename: str = "image") -> ProcessConfig:
     async with _lock:
         cfg = ProcessConfig()
-        _sessions[thread_id] = (cfg, image_bytes)
+        _sessions[thread_id] = (cfg, image_bytes, filename)
         return cfg
 
 
@@ -34,11 +34,17 @@ async def update_session(thread_id: int, **kwargs) -> Optional[ProcessConfig]:
         entry = _sessions.get(thread_id)
         if entry is None:
             return None
-        cfg, img_bytes = entry
+        cfg, img_bytes, filename = entry
         for k, v in kwargs.items():
             if hasattr(cfg, k):
                 setattr(cfg, k, v)
         return cfg
+
+
+async def get_filename(thread_id: int) -> str:
+    async with _lock:
+        entry = _sessions.get(thread_id)
+        return entry[2] if entry else "image"
 
 
 async def reset_session(thread_id: int) -> Optional[ProcessConfig]:
@@ -47,9 +53,9 @@ async def reset_session(thread_id: int) -> Optional[ProcessConfig]:
         entry = _sessions.get(thread_id)
         if entry is None:
             return None
-        _, img_bytes = entry
+        _, img_bytes, filename = entry
         cfg = ProcessConfig()
-        _sessions[thread_id] = (cfg, img_bytes)
+        _sessions[thread_id] = (cfg, img_bytes, filename)
         return cfg
 
 
@@ -58,7 +64,7 @@ async def add_remove_colour(thread_id: int, hex_str: str) -> Optional[ProcessCon
         entry = _sessions.get(thread_id)
         if entry is None:
             return None
-        cfg, img_bytes = entry
+        cfg, img_bytes, filename = entry
         try:
             rgb = hex_to_rgb(hex_str)
         except ValueError:
@@ -73,7 +79,7 @@ async def clear_remove_colours(thread_id: int) -> Optional[ProcessConfig]:
         entry = _sessions.get(thread_id)
         if entry is None:
             return None
-        cfg, _ = entry
+        cfg, _, _fn = entry
         cfg.remove_colours.clear()
         return cfg
 

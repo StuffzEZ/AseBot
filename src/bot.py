@@ -136,7 +136,7 @@ async def _handle_image_upload(message: discord.Message, attachment: discord.Att
         img_bytes = await attachment.read()
 
         # Create session with defaults
-        cfg = await sessions.create_session(thread.id, img_bytes)
+        cfg = await sessions.create_session(thread.id, img_bytes, attachment.filename.rsplit('.', 1)[0])
 
         await thread.send(
             f"📥 Got **{attachment.filename}** — running default processing…"
@@ -218,7 +218,7 @@ async def _reprocess(interaction: discord.Interaction, thread_id: int):
         await interaction.followup.send("⚠️ Session expired. Please re-upload the image.", ephemeral=True)
         return
 
-    cfg, img_bytes = entry
+    cfg, img_bytes, filename_hint = entry
 
     # Run in executor
     try:
@@ -231,15 +231,6 @@ async def _reprocess(interaction: discord.Interaction, thread_id: int):
         return
 
     thread = interaction.channel
-    filename_hint = "image"
-    if isinstance(thread, discord.Thread) and thread.parent_message_id:
-        try:
-            parent = await thread.parent.fetch_message(thread.parent_message_id)
-            if parent.attachments:
-                filename_hint = parent.attachments[0].filename.rsplit(".", 1)[0]
-        except Exception:
-            pass
-
     await _post_results(thread, png_bytes, ase_bytes, info, cfg, f"{filename_hint}.png")
 
 
@@ -256,7 +247,7 @@ async def slash_settings(interaction: discord.Interaction):
     if entry is None:
         await interaction.response.send_message("⚠️ No active session in this thread.", ephemeral=True)
         return
-    cfg, _ = entry
+    cfg, _, _fn = entry
     await interaction.response.send_message(f"**Current settings:**\n{_cfg_summary(cfg)}", ephemeral=True)
 
 
