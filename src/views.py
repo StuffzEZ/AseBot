@@ -193,7 +193,7 @@ class ControlPanel(ui.View):
         if entry is None:
             await interaction.response.send_message("⚠️ Session not found.", ephemeral=True)
             return
-        cfg, _ = entry
+        cfg, _, _fn = entry
         await interaction.response.send_message(
             f"**Current settings:**\n{_cfg_summary(cfg)}", ephemeral=True
         )
@@ -207,7 +207,7 @@ class ControlPanel(ui.View):
         if entry is None:
             await interaction.response.send_message("⚠️ Session not found.", ephemeral=True)
             return
-        cfg, _ = entry
+        cfg, _, _fn = entry
         new_val = not cfg.remove_bg
         await sessions.update_session(self._thread_id, remove_bg=new_val)
         state = "ON ✅" if new_val else "OFF ❌"
@@ -276,7 +276,7 @@ class ControlPanel(ui.View):
         if entry is None:
             await interaction.response.send_message("⚠️ Session not found.", ephemeral=True)
             return
-        cfg, _ = entry
+        cfg, _, _fn = entry
         new_val = not cfg.pixel_snap
         await sessions.update_session(self._thread_id, pixel_snap=new_val)
         state = "ON ✅" if new_val else "OFF ❌"
@@ -301,7 +301,7 @@ class ControlPanel(ui.View):
         if entry is None:
             await interaction.response.send_message("⚠️ Session not found.", ephemeral=True)
             return
-        cfg, _ = entry
+        cfg, _, _fn = entry
         new_val = not cfg.trim_edges
         await sessions.update_session(self._thread_id, trim_edges=new_val)
         state = "ON ✅" if new_val else "OFF ❌"
