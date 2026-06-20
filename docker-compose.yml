@@ -1,0 +1,19 @@
+services:
+  asebot:
+    image: ghcr.io/stuffzez/asebot:latest
+    restart: unless-stopped
+    environment:
+      # ── Required ─────────────────────────────────────────────────────────
+      - DISCORD_TOKEN=your_bot_token_here
+
+      # ── Optional: restrict to a specific server (guild) ──────────────────
+      # Find it: right-click your server icon → Copy Server ID
+      # Leave blank to work in ALL servers the bot is in
+      - GUILD_ID=
+
+      # ── Optional: restrict to specific channels ───────────────────────────
+      # Comma-separated. Right-click a channel → Copy Channel ID
+      # Leave blank to watch ALL channels in the server(s) above
+      - CHANNEL_IDS=
+
+    # No ports needed — bot only makes outbound connections to Discord
